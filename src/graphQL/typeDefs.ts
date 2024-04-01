@@ -1,4 +1,11 @@
-import { GraphQLObjectType, GraphQLInt, GraphQLString, GraphQLNonNull, GraphQLList, GraphQLEnumType } from 'graphql';
+import {
+	GraphQLBoolean,
+	GraphQLEnumType,
+	GraphQLList,
+	GraphQLNonNull,
+	GraphQLObjectType,
+	GraphQLString,
+} from 'graphql';
 
 import { Post as PostType, User } from '@prisma/client';
 import { resolvers } from './resolvers';
@@ -21,7 +28,7 @@ const User: GraphQLObjectType<User> = new GraphQLObjectType({
 		createdAt: { type: new GraphQLNonNull(GraphQLString) },
 		posts: {
 			type: new GraphQLList(Post),
-			resolve: resolvers.post.getByUser,
+			resolve: user => resolvers.post.getByUserId(user.id),
 		},
 	}),
 });
@@ -37,7 +44,7 @@ const Post: GraphQLObjectType<PostType> = new GraphQLObjectType({
 		userId: { type: new GraphQLNonNull(GraphQLString) },
 		user: {
 			type: User,
-			resolve: resolvers.user.getByPost,
+			resolve: post => resolvers.user.getByPostId(post.id),
 		},
 	}),
 });

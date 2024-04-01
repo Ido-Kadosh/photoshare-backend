@@ -13,12 +13,13 @@ export interface IAddPost {
 const postQuery = {
 	post: {
 		type: typeDefs.Post,
-		args: { id: { type: GraphQLString } },
+		args: { id: { type: new GraphQLNonNull(GraphQLString) } },
 		resolve: (_: unknown, args: { id: string }) => resolvers.post.getById(args.id),
 	},
 	posts: {
 		type: new GraphQLList(typeDefs.Post),
-		resolve: resolvers.post.get,
+		args: { userId: { type: GraphQLString } },
+		resolve: (_: unknown, args: { userId: string }) => resolvers.post.get(args.userId),
 	},
 };
 
@@ -28,7 +29,7 @@ const postMutation = {
 		args: {
 			title: { type: new GraphQLNonNull(GraphQLString) },
 			contentUrl: { type: new GraphQLNonNull(GraphQLString) },
-			contentType: { type: new GraphQLNonNull(typeDefs.PostContentType) },
+			contentType: { type: typeDefs.PostContentType },
 			userId: { type: new GraphQLNonNull(GraphQLString) },
 		},
 		resolve: (_: unknown, args: IAddPost) => resolvers.post.add(args),

@@ -1,29 +1,58 @@
-import { Post, User } from '@prisma/client';
+import { Post } from '@prisma/client';
+import prisma from '../../db';
 import { IAddPost } from '../schema/postSchema';
 
-const posts: Post[] = [
-	{
-		id: '123123',
-		title: 'first post',
-		contentUrl: 'https://picsum.photos/480/585 ',
-		contentType: 'IMG',
-		createdAt: new Date(),
-		userId: '123123',
-		commentCount: 12,
-		tags: ['11'],
-	},
-];
-
-const getByUser = async (user: User) => {
-	return posts.filter(post => post.userId === user.id);
+const getByUserId = async (userId: string) => {
+	return await prisma.post.findMany({
+		where: {
+			userId,
+		},
+	});
 };
 
-const get = async () => {
-	return posts;
+const get = async (userId: string) => {
+	const posts = await prisma.post.findMany({
+		include: {
+			likedByUsers: {
+				select: { id: true }, // Minimize the amount of data fetched
+				where: { id: userId }, // Fetch only the current user's like
+			},
+		},
+		orderBy: {
+			createdAt: 'desc',
+		},
+	});
+	return posts.map(post => ({
+		...post,
+		likedByUser: post.likedByUsers.length > 0,
+	}));
 };
 
-const getById = async (postId: string): Promise<Post | undefined> => {
-	return posts.find(post => post.id === postId);
+const getById = async (postId: string): Promise<Post | null> => {
+	return await prisma.post.findUnique({
+		where: {
+			id: postId,
+		},
+	});
+};
+
+const add = async (post: IAddPost): Promise<any> => {
+	return await prisma.post.create({
+		data: {
+			title: post.title,
+			contentUrl: post.contentUrl,
+			contentType: post.contentType,
+			userId: post.userId,
+		},
+	});
+};
+
+const remove = async (postId: string): Promise<Post | null> => {
+	return await prisma.post.delete({
+		where: {
+			id: postId,
+		},
+	});
 };
 
 const add = async (post: IAddPost): Promise<Post> => {
@@ -36,8 +65,9 @@ const add = async (post: IAddPost): Promise<Post> => {
 
 export const postResolver = {
 	get,
-	getByUser,
+	getByUserId,
 	getById,
 	add,
+	remove,
 	// remove,
 };

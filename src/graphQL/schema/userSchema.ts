@@ -2,6 +2,12 @@ import { GraphQLList, GraphQLString } from 'graphql';
 import { resolvers } from '../resolvers';
 import { typeDefs } from '../typeDefs';
 
+export interface IAddUser {
+	username: string;
+	email: string;
+	imgUrl: string;
+}
+
 const userQuery = {
 	user: {
 		type: typeDefs.User,

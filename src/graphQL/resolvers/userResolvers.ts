@@ -1,29 +1,45 @@
-import { Post, User } from '@prisma/client';
+import { User } from '@prisma/client';
 
-const users: User[] = [
-	{
-		id: '123123',
-		username: 'benjamin',
-		email: '123@gmail.com',
-		imgUrl: 'htp.com',
-		createdAt: new Date(),
-	},
-];
+import prisma from '../../db';
+import { IAddUser } from '../schema/userSchema';
 
-const getByPost = async (post: Post): Promise<User | undefined> => {
-	return users.find(user => user.id === post.userId);
-};
-
-const getById = async (userId: string): Promise<User | undefined> => {
-	return users.find(user => user.id === userId);
+const getByPostId = async (postId: string): Promise<User | null> => {
+	return prisma.user.findFirst({
+		where: {
+			posts: {
+				some: {
+					id: postId,
+				},
+			},
+		},
+	});
 };
 
 const get = async (): Promise<User[]> => {
-	return users;
+	return prisma.user.findMany();
+};
+
+const getById = async (userId: string): Promise<User | null> => {
+	return prisma.user.findUnique({
+		where: {
+			id: userId,
+		},
+	});
+};
+
+const add = async (user: IAddUser): Promise<User> => {
+	return await prisma.user.create({
+		data: {
+			username: user.username,
+			email: user.email,
+			imgUrl: user.imgUrl,
+		},
+	});
 };
 
 export const userResolvers = {
-	getByPost,
+	getByPostId,
 	get,
 	getById,
+	add,
 };
