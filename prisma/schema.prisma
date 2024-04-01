@@ -24,7 +24,8 @@ model User {
   email String @unique
   imgUrl String
   createdAt DateTime @default(now())
-  posts Post[]
+  posts Post[] @relation(name: "UserPosts")
+  likedPosts Post[] @relation(name: "LikedPosts")
 }
 
 model Post {
@@ -33,9 +34,10 @@ model Post {
     contentUrl String
     contentType PostContentType
     createdAt DateTime @default(now())
-    user User @relation(fields: [userId], references: [id])
-    userId String 
-    commentCount Int
+    user User @relation(name:"UserPosts",fields: [userId], references: [id])
+    userId String
+    likedByUsers User[] @relation(name:"LikedPosts")
+    // commentCount Int
     tags String[]
 
 }

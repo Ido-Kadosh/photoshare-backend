@@ -42,6 +42,7 @@ const Post: GraphQLObjectType<PostType> = new GraphQLObjectType({
 		contentType: { type: new GraphQLNonNull(GraphQLString) },
 		createdAt: { type: new GraphQLNonNull(GraphQLString) },
 		userId: { type: new GraphQLNonNull(GraphQLString) },
+		likedByUser: { type: GraphQLBoolean },
 		user: {
 			type: User,
 			resolve: post => resolvers.user.getByPostId(post.id),

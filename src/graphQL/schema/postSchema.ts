@@ -34,6 +34,14 @@ const postMutation = {
 		},
 		resolve: (_: unknown, args: IAddPost) => resolvers.post.add(args),
 	},
+	togglePostLike: {
+		type: typeDefs.Post,
+		args: {
+			postId: { type: new GraphQLNonNull(GraphQLString) },
+			userId: { type: new GraphQLNonNull(GraphQLString) },
+		},
+		resolve: (_: unknown, args: { postId: string; userId: string }) => resolvers.post.toggleLike(args),
+	},
 	// deletePost: {
 	// 	type: typeDefs.Post,
 	// 	args: {

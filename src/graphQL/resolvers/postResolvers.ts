@@ -55,13 +55,41 @@ const remove = async (postId: string): Promise<Post | null> => {
 	});
 };
 
-const add = async (post: IAddPost): Promise<Post> => {
-	const newPost: Post = { ...post, id: posts.length + 1 + '', createdAt: new Date() } as Post;
-	posts.push(newPost);
-	return newPost;
-};
+const toggleLike = async ({ postId, userId }: { postId: string; userId: string }) => {
+	const post = await prisma.post.findUnique({
+		where: { id: postId },
+		include: {
+			likedByUsers: {
+				where: {
+					id: userId,
+				},
+			},
+		},
+	});
+	if (!post) throw new Error('Post not found');
 
-// const remove = async (postId: string): Promise<Post | undefined> => {};
+	const alreadyLiked = post.likedByUsers.length > 0;
+
+	if (alreadyLiked) {
+		return await prisma.post.update({
+			where: { id: postId },
+			data: {
+				likedByUsers: {
+					disconnect: [{ id: userId }],
+				},
+			},
+		});
+	} else {
+		return await prisma.post.update({
+			where: { id: postId },
+			data: {
+				likedByUsers: {
+					connect: [{ id: userId }],
+				},
+			},
+		});
+	}
+};
 
 export const postResolver = {
 	get,
@@ -69,5 +97,5 @@ export const postResolver = {
 	getById,
 	add,
 	remove,
-	// remove,
+	toggleLike,
 };
